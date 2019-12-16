@@ -8,18 +8,19 @@ from mytransformation_2inputs import ToTensor
 
 class Dataset_unet(Dataset):
 
-    def __init__(self, image_dir, label_dir, boundary_dir=None, transform=None):
+    def __init__(self, image_dir, label_dir, boundary_dir=None,with_boundary=False, transform=None):
         self.image_ids = os.listdir(image_dir)
         self.image_dir = image_dir
         self.label_dir = label_dir
         if boundary_dir is not None: self.boundary_dir = boundary_dir
         self.transform = transform
+        self.with_boundary = with_boundary
 
     def __len__(self):
         return len(self.image_ids)
 
-    def __getitem__(self, idx, with_boundary=False):
-        if not with_boundary:
+    def __getitem__(self, idx):
+        if not self.with_boundary:
             sample = self.getDataDict(idx)
         else:
             sample = self.getDataDictWithBoundary(idx)

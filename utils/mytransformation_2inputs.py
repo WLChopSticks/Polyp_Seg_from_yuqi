@@ -13,11 +13,7 @@ from torch.utils.data import DataLoader
 class ToTensor(object):
 
     def __call__(self, sample):
-        image, label = sample['image'], sample['label']
-        return {'image': F.to_tensor(image), 'label': F.to_tensor(label), 'num': sample['num']}
-
-    def __call__(self, sample, with_boundary=False):
-        if not with_boundary:
+        if not 'boundary' in sample.keys():
             image, label = sample['image'], sample['label']
             return {'image': F.to_tensor(image), 'label': F.to_tensor(label), 'num': sample['num']}
         else:
@@ -29,8 +25,8 @@ class Resize(object):
     def __init__(self, size):
         self.size = size
 
-    def __call__(self, sample, with_boundary=False):
-        if not with_boundary:
+    def __call__(self, sample):
+        if not 'boundary' in sample.keys():
             image, label = sample['image'], sample['label']
             return {'image': F.resize(image, size=self.size), 'label': F.resize(label, size=self.size),
                     'num': sample['num']}

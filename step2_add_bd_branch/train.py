@@ -31,7 +31,7 @@ def train_net(image_dir, label_dir, boundary_dir, checkpoint_dir, net, epochs=20
 
     transform1 = transforms.Compose([Resize((384,288)),ToTensor()])
 
-    dataset = Dataset_unet(image_dir, label_dir, boundary_dir, transform=transform1)
+    dataset = Dataset_unet(image_dir, label_dir, boundary_dir,with_boundary=True, transform=transform1)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=batch_size, drop_last=True)
     dataset_sizes = len(dataset)
     batch_num = int(dataset_sizes/batch_size)
@@ -85,14 +85,14 @@ def train_net(image_dir, label_dir, boundary_dir, checkpoint_dir, net, epochs=20
 def get_args():
     parser = OptionParser()
     parser.add_option('-e', '--epochs', dest='epochs', default=200, type='int', help='number of epochs')
-    parser.add_option('-b', '--batch-size', dest='batchsize', default=4, type='int', help='batch size')
+    parser.add_option('-b', '--batch-size', dest='batchsize', default=8, type='int', help='batch size')
     parser.add_option('-l', '--learning-rate', dest='lr', default=0.01, type='float', help='learning rate')
     parser.add_option('-g', '--gpu', action='store_true', dest='gpu', default=True, help='use cuda')
     parser.add_option('-i', '--image_dir', dest='imagedir', default='../train/images/', help='load image directory')
     parser.add_option('-t', '--GT_area_dir', dest='gt', default='../train/labels/', help='load area GT directory')
     parser.add_option('-k', '--GT_boundary_dir', dest='bd', default='../train/boundarytk/', help='load bd GT directory')
     parser.add_option('-p', '--checkpoint_dir', dest='checkpoint', default='./step2_checkpoints/', help='save checkpoint directory')
-    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='./step2_train_log', help='save tensorboard directory')
+    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='./step2_train_log/run1', help='save tensorboard directory')
 
     (options, args) = parser.parse_args()
     return options
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     # from unet_3up_area.unet_model import UNet as UNet_old
     from step1_area_branch_with_sknet.unet.unet_model import UNet as UNet_old
     net_old = UNet_old(n_channels=3, n_classes=1)
-    net_old.load_state_dict(torch.load('../load_model_from_step1_area_branch_with_sknet/step1_checkpoints/CP150.pth'))
+    net_old.load_state_dict(torch.load('../step1_area_branch_with_sknet/step1_checkpoints/CP149.pth'))
     net_old_dict = net_old.state_dict()
 
     # (2) our new model
