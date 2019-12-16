@@ -30,6 +30,8 @@ MANIFEST
 .idea/
 train/
 validate/
+step1_area_branch_with_sknet/step1_checkpoints
+step1_area_branch_with_sknet/step1_train_log
 
 
 # PyInstaller

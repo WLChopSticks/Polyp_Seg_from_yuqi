@@ -16,25 +16,28 @@ class ToTensor(object):
         image, label = sample['image'], sample['label']
         return {'image': F.to_tensor(image), 'label': F.to_tensor(label), 'num': sample['num']}
 
-    def __call__(self, sample, with_boundary):
-        image, label, boundary = sample['image'], sample['label'], sample['boundary']
-        return {'image': F.to_tensor(image), 'label': F.to_tensor(label), 'boundary': F.to_tensor(boundary), 'num': sample['num']}
+    def __call__(self, sample, with_boundary=False):
+        if not with_boundary:
+            image, label = sample['image'], sample['label']
+            return {'image': F.to_tensor(image), 'label': F.to_tensor(label), 'num': sample['num']}
+        else:
+            image, label, boundary = sample['image'], sample['label'], sample['boundary']
+            return {'image': F.to_tensor(image), 'label': F.to_tensor(label), 'boundary': F.to_tensor(boundary), 'num': sample['num']}
 
 class Resize(object):
 
     def __init__(self, size):
         self.size = size
 
-    def __call__(self, sample):
-        image, label = sample['image'], sample['label']
-
-        return {'image': F.resize(image, size=self.size), 'label': F.resize(label, size=self.size), 'num': sample['num']}
-
-    def __call__(self, sample, with_boundary):
-        image, label, boundary = sample['image'], sample['label'], sample['boundary']
-
-        return {'image': F.resize(image, size=self.size), 'label': F.resize(label, size=self.size),
-                'boundary': F.resize(boundary, size=self.size), 'num': sample['num']}
+    def __call__(self, sample, with_boundary=False):
+        if not with_boundary:
+            image, label = sample['image'], sample['label']
+            return {'image': F.resize(image, size=self.size), 'label': F.resize(label, size=self.size),
+                    'num': sample['num']}
+        else:
+            image, label, boundary = sample['image'], sample['label'], sample['boundary']
+            return {'image': F.resize(image, size=self.size), 'label': F.resize(label, size=self.size),
+                    'boundary': F.resize(boundary, size=self.size), 'num': sample['num']}
 
 
 
