@@ -28,6 +28,8 @@ share/python-wheels/
 MANIFEST
 
 .idea/
+train/
+validate/
 
 
 # PyInstaller
