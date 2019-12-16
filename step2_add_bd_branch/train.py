@@ -8,10 +8,10 @@ import sys
 from unet.unet_model import UNet
 from torch.utils.data import DataLoader
 import LossFunction_yq
-from Dataset_yq_2inputs import Dataset_unet
 from torchvision import transforms
-from mytransformation_2inputs import ToTensor
-from tensorboardX import SummaryWriter
+from utils.Dataset_yq_2inputs import Dataset_unet
+from utils.mytransformation_2inputs import ToTensor, Resize
+from torch.utils.tensorboard import SummaryWriter
 
 
 def train_net(image_dir, label_dir, boundary_dir, checkpoint_dir, net, epochs=200, batch_size=4, lr=0.001, save_cp=True, gpu=True):
@@ -29,7 +29,7 @@ def train_net(image_dir, label_dir, boundary_dir, checkpoint_dir, net, epochs=20
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[15, 75, 150], gamma=0.1)
     criterion_bce = LossFunction_yq.BCELoss()
 
-    transform1 = transforms.Compose([ToTensor()])
+    transform1 = transforms.Compose([Resize((384,288)),ToTensor()])
 
     dataset = Dataset_unet(image_dir, label_dir, boundary_dir, transform=transform1)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=batch_size, drop_last=True)
@@ -76,6 +76,8 @@ def train_net(image_dir, label_dir, boundary_dir, checkpoint_dir, net, epochs=20
         writer.add_scalar('Train_Loss (bd)', epoch_loss/batch_num, epoch)
 
         if save_cp:
+            if not os.path.exists(checkpoint_dir):
+                os.mkdir(checkpoint_dir)
             if epoch % 5 == 0:
                 torch.save(net.state_dict(), checkpoint_dir + 'CP{}.pth'.format(epoch + 1))
 
@@ -89,8 +91,8 @@ def get_args():
     parser.add_option('-i', '--image_dir', dest='imagedir', default='../train/images/', help='load image directory')
     parser.add_option('-t', '--GT_area_dir', dest='gt', default='../train/labels/', help='load area GT directory')
     parser.add_option('-k', '--GT_boundary_dir', dest='bd', default='../train/boundarytk/', help='load bd GT directory')
-    parser.add_option('-p', '--checkpoint_dir', dest='checkpoint', default='../checkpoints/', help='save checkpoint directory')
-    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='../train_log', help='save tensorboard directory')
+    parser.add_option('-p', '--checkpoint_dir', dest='checkpoint', default='./step2_checkpoints/', help='save checkpoint directory')
+    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='./step2_train_log', help='save tensorboard directory')
 
     (options, args) = parser.parse_args()
     return options
@@ -110,9 +112,10 @@ if __name__ == '__main__':
 
     # (1) get param from pre-trained model
     # from unet_3up_area.unet.unet_model import UNet as UNet_old
-    from unet_3up_area.unet_model import UNet as UNet_old
+    # from unet_3up_area.unet_model import UNet as UNet_old
+    from step1_area_branch_with_sknet.unet.unet_model import UNet as UNet_old
     net_old = UNet_old(n_channels=3, n_classes=1)
-    net_old.load_state_dict(torch.load('../load_model_from_step1_area_branch_with_sknet/CPxx.pth'))
+    net_old.load_state_dict(torch.load('../load_model_from_step1_area_branch_with_sknet/step1_checkpoints/CP150.pth'))
     net_old_dict = net_old.state_dict()
 
     # (2) our new model
