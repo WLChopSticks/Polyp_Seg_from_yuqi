@@ -2,11 +2,11 @@ from __future__ import division
 import torch
 from optparse import OptionParser
 from unet.unet_model import UNet
-from Dataset_yq_2inputs import Dataset_unet
+from utils.Dataset_yq_2inputs import Dataset_unet
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from mytransformation_2inputs import ToTensor
-from tensorboardX import SummaryWriter
+from utils.mytransformation_2inputs import ToTensor, Resize
+from torch.utils.tensorboard import SummaryWriter
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,16 +18,16 @@ import torchvision.transforms.functional as F
 
 
 def predict(validate_image_dir, validate_label_dir, validate_boundary_dir, checkpoints_dir, net, batch_size=1, gpu=True):
-    transform1 = transforms.Compose([ToTensor()])
-    file_num = 31
+    transform1 = transforms.Compose([Resize((384,288)), ToTensor()])
+    file_num = 30
     validate_dataset = Dataset_unet(validate_image_dir, validate_label_dir, validate_boundary_dir, transform=transform1)
     dataloader = DataLoader(validate_dataset, batch_size=batch_size)
     dataset_sizes = len(validate_dataset)
     batch_num = int(dataset_sizes/batch_size)
 
     for epoch in range(1, file_num):
-        net.load_state_dict(torch.load(checkpoints_dir + 'CP' + str(5*epoch-4) + '.pth'))
-
+        net.load_state_dict(torch.load(checkpoints_dir + 'step3_checkpointsCP' + str(5*epoch) + '.pth'))
+        print(epoch)
         Sensitivity = 0
         Specificity = 0
         Precision = 0
@@ -132,10 +132,10 @@ def get_args():
     parser.add_option('-i', '--validate_image_dir', dest='imagedir', default='../validate/images/', help='load validation image directory')
     parser.add_option('-t', '--validate_label_dir', dest='gt', default='../validate/labels/', help='load validation area GT directory')
     parser.add_option('-k', '--GT_boundary_dir', dest='bd', default='../validate/boundarytk/', help='load bd GT directory')
-    parser.add_option('-p', '--checkpoint_dir', dest='checkpoint', default='../checkpoints/', help='save checkpoint directory')
+    parser.add_option('-p', '--checkpoint_dir', dest='checkpoint', default='./step3_checkpoints/', help='save checkpoint directory')
     parser.add_option('-b', '--batch-size', dest='batchsize', default=1, type='int', help='batch size')
     parser.add_option('-g', '--gpu', action='store_true', dest='gpu', default=True, help='use cuda')
-    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='../validate_log', help='save tensorboard directory')
+    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='./step3_validate_log', help='save tensorboard directory')
 
     (options, args) = parser.parse_args()
     return options

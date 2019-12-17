@@ -35,6 +35,9 @@ step1_area_branch_with_sknet/step1_train_log
 step2_add_bd_branch/step2_checkpoints
 step2_add_bd_branch/step2_train_log
 step2_add_bd_branch/step2_validate_log
+step3_combine_area_bd/step3_train_log
+step3_combine_area_bd/step3_checkpoints
+step3_combine_area_bd/step3_validate_log
 
 
 # PyInstaller
