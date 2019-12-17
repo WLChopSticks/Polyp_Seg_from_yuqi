@@ -53,8 +53,8 @@ class LightUNet(nn.Module):
         self.inc = Inconv(n_channels, 64)
         self.down1 = Down(64, 128)
         self.down2 = Down(128, 128)
-        self.up3_a3up = Up3(128, 64)
-        self.up4_a3up = Up4(64, 64)
+        self.up1_a3up = Up1(128, 64)
+        self.up2_a3up = Up1(64, 64)
         self.outc_a3up = Outconv(64, n_classes)
 
 
@@ -64,7 +64,7 @@ class LightUNet(nn.Module):
         x3 = self.down2(x2)
 
         x4 = self.up1_a3up(x3, x2)
-        x5 = self.up1_a3up(x4, x1)
+        x5 = self.up2_a3up(x4, x1)
         x6 = self.outc_a3up(x5)
 
         return x6

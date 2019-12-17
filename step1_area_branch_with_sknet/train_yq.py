@@ -87,7 +87,7 @@ def get_args():
     parser.add_option('-i', '--image_dir', dest='imagedir', default='../train/images/', help='load image directory')
     parser.add_option('-t', '--GT_area_dir', dest='gt', default='../train/labels/', help='load area GT directory')
     parser.add_option('-p', '--checkpoint_dir', dest='checkpoint', default='./step1_checkpoints/', help='save step1 checkpoint directory')
-    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='./step1_train_log/', help='save tensorboard directory')
+    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='./step1_train_log/run1', help='save tensorboard directory')
 
     (options, args) = parser.parse_args()
     return options
