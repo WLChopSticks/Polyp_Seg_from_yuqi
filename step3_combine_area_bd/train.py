@@ -8,10 +8,10 @@ import sys
 from unet.unet_model import UNet
 from torch.utils.data import DataLoader
 import LossFunction_yq
-from Dataset_yq_2inputs import Dataset_unet
+from utils.Dataset_yq_2inputs import Dataset_unet
 from torchvision import transforms
-from mytransformation_2inputs import ToTensor
-from tensorboardX import SummaryWriter
+from utils.mytransformation_2inputs import ToTensor, Resize
+from torch.utils.tensorboard import SummaryWriter
 
 
 def train_net(image_dir, label_dir, boundary_dir, checkpoint_dir, net, epochs=300, batch_size=4, lr=0.0001, save_cp=True, gpu=True):
@@ -30,9 +30,9 @@ def train_net(image_dir, label_dir, boundary_dir, checkpoint_dir, net, epochs=30
     criterion_bcedice = LossFunction_yq.BCEDiceLoss()
     criterion_bce = LossFunction_yq.BCELoss()
 
-    transform1 = transforms.Compose([ToTensor()])
+    transform1 = transforms.Compose([Resize((384,288)),ToTensor()])
 
-    dataset = Dataset_unet(image_dir, label_dir, boundary_dir, transform=transform1)
+    dataset = Dataset_unet(image_dir, label_dir, boundary_dir, with_boundary=True, transform=transform1)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=batch_size, drop_last=True)
     dataset_sizes = len(dataset)
     batch_num = int(dataset_sizes/batch_size)
@@ -106,9 +106,9 @@ def get_args():
     parser.add_option('-g', '--gpu', action='store_true', dest='gpu', default=True, help='use cuda')
     parser.add_option('-i', '--image_dir', dest='imagedir', default='../train/images/', help='load image directory')
     parser.add_option('-t', '--GT_area_dir', dest='gt', default='../train/labels/', help='load area GT directory')
-    parser.add_option('-k', '--GT_boundary_dir', dest='bd', default='../boundarytk/', help='load bd GT directory')
-    parser.add_option('-p', '--checkpoint_dir', dest='checkpoint', default='../checkpoints/', help='save checkpoint directory')
-    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='../train_log', help='save tensorboard directory')
+    parser.add_option('-k', '--GT_boundary_dir', dest='bd', default='../train/boundarytk/', help='load bd GT directory')
+    parser.add_option('-p', '--checkpoint_dir', dest='checkpoint', default='./step3_checkpoints/', help='save checkpoint directory')
+    parser.add_option('-w', '--tensorboard_dir', dest='tensorboard', default='./step3_train_log', help='save tensorboard directory')
 
     (options, args) = parser.parse_args()
     return options
@@ -129,9 +129,10 @@ if __name__ == '__main__':
 
     # (1) get param from pre-trained model
     # from unet_3up_ab_toge.unet.unet_model import UNet as UNet_old
-    from unet_3up_ab.unet_model import UNet as UNet_old
+    # from unet_3up_ab.unet_model import UNet as UNet_old
+    from step2_add_bd_branch.unet.unet_model import UNet as UNet_old
     net_old = UNet_old(n_channels=3, n_classes=1)
-    net_old.load_state_dict(torch.load('../load_model_from_step2_add_bd_branch/load_model_from_2ab_fixa/CPxx.pth'))
+    net_old.load_state_dict(torch.load('../step2_add_bd_branch/step2_checkpoints/CP31.pth'))
     net_old_dict = net_old.state_dict()
 
     # (2) our new model

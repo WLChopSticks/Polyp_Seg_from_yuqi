@@ -19,6 +19,7 @@ class UNet(nn.Module):
         self.up4_b3up = Up4(64, 64)
         self.outc_a3up = Outconv(64, n_classes)
         self.outc_b3up = Outconv(64, n_classes)
+        self.lightUnet = LightUNet(n_channels=1, n_classes=1)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -42,8 +43,31 @@ class UNet(nn.Module):
         x10 = self.outc_a3up(x9)
         x10_b = self.outc_b3up(x9_b)
 
-        return x10, x10_b
+        x10_ab = self.lightUnet(x10)
+        return x10, x10_b, x10_ab
 
+
+class LightUNet(nn.Module):
+    def __init__(self, n_channels, n_classes):
+        super(LightUNet, self).__init__()
+        self.inc = Inconv(n_channels, 64)
+        self.down1 = Down(64, 128)
+        self.down2 = Down(128, 128)
+        self.up3_a3up = Up3(128, 64)
+        self.up4_a3up = Up4(64, 64)
+        self.outc_a3up = Outconv(64, n_classes)
+
+
+    def forward(self, x):
+        x1 = self.inc(x)
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+
+        x4 = self.up1_a3up(x3, x2)
+        x5 = self.up1_a3up(x4, x1)
+        x6 = self.outc_a3up(x5)
+
+        return x6
 
 if __name__ == '__main__':
     input = torch.rand(4, 3, 512, 512)
